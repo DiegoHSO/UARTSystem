@@ -1,0 +1,40 @@
+.CODE
+0x00400000  0x0810000c  j 0x00400030          7            j MyMain
+0x00400004  0x08100003  j 0x0040000c          13           j CPU_to_UART
+0x00400008  0x08100008  j 0x00400020          14           j UART_to_CPU
+0x0040000c  0x27bdfff8  addiu $29,$29,-8      20   	addiu $sp, $sp, -8 # Aloca espaço na pilha
+0x00400010  0xafa80000  sw $8,0($29)          21           sw $t0, 0($sp) # Salva o conteúdo do registrador na pilha
+0x00400014  0xafa90004  sw $9,4($29)          22           sw $t1, 4($sp) # Salva o conteúdo do registrador na pilha
+0x00400018  0x26100001  addiu $16,$16,1       23   	addiu $s0, $s0, 1     # Incrementa o ponteiro de mensagemTransmitida
+0x0040001c  0x42000018  eret                  24   	eret # Fim da rotina de tratamento de interrupção
+0x00400020  0x92540008  lbu $20,8($18)        28   	lbu $s4, 8($s2)        # Lê o caractere escrito na UART B e passa para o registrador $s4
+0x00400024  0xa2340000  sb $20,0($17)         29   	sb $s4, 0($s1)        # Armazena caractere no mensagemRecebida
+0x00400028  0x26310001  addiu $17,$17,1       30   	addiu $s1, $s1, 1     # Incrementa ponteiro de mensagemRecebida
+0x0040002c  0x42000018  eret                  31   	eret # Fim da rotina de tratamento de interrupção
+0x00400030  0x3c011001  lui $1,4097           37   	la $s0, mensagemTransmitida  # $s0 é o ponteiro de mensagemTransmitida
+0x00400034  0x34300000  ori $16,$1,0               
+0x00400038  0x3c011001  lui $1,4097           38   	la $s1, mensagemRecebida     # $s1 é o ponteiro de mensagemRecebida
+0x0040003c  0x34310012  ori $17,$1,18              
+0x00400040  0x24080001  addiu $8,$0,1         39           li $t0, 1 # Carrega valor qualquer no registrador
+0x00400044  0x24090002  addiu $9,$0,2         40           li $t1, 2 # Carrega valor qualquer no registrador
+0x00400048  0x240a0000  addiu $10,$0,0        41           li $t2, 0 # Carrega valor qualquer no registrador
+0x0040004c  0x3c011001  lui $1,4097           42   	la $s2, EnderecoUART # Carrega o endereço da UART na memória no registrador
+0x00400050  0x3432002c  ori $18,$1,44              
+0x00400054  0x8e520000  lw $18,0($18)         43   	lw $s2, 0($s2) # Carrega o endereço da UART no registrador
+0x00400058  0x92130000  lbu $19,0($16)        46   	lbu $s3, 0($s0)  # Carrega a letra da mensagem em $s3
+0x0040005c  0x12600007  beq $19,$0,7          47          	beq $s3, $zero, UltimoCaracter # Caso o caractére lido seja igual a 0 (fim da frase), desvia para o fim do programa
+0x00400060  0xa2530004  sb $19,4($18)         48          	sb $s3, 4($s2)  # Armazena a letra na UART A
+0x00400064  0x00000000  nop                   49           nop
+0x00400068  0x8fa90004  lw $9,4($29)          50           lw $t1, 4($sp) # Recupera o valor de $t1 salvo na pilha
+0x0040006c  0x8fa80000  lw $8,0($29)          51          	lw $t0, 0($sp) # Recupera o valor de $t2 salvo na pilha
+0x00400070  0x27bd0008  addiu $29,$29,8       52           addiu $sp, $sp, 8 # Libera o espaço anteriormente armazenado na pilha
+0x00400074  0x08100016  j 0x00400058          53           j SaltoMyMain
+0x00400078  0xa2530004  sb $19,4($18)         57          	sb $s3, 4($s2)  # Armazena a letra na UART A
+0x0040007c  0x00000000  nop                   58           nop
+0x00400080  0x8fa90004  lw $9,4($29)          59           lw $t1, 4($sp) # Recupera o valor de $t1 salvo na pilha
+0x00400084  0x8fa80000  lw $8,0($29)          60          	lw $t0, 0($sp) # Recupera o valor de $t2 salvo na pilha
+0x00400088  0x27bd0008  addiu $29,$29,8       61           addiu $sp, $sp, 8 # Libera o espaço anteriormente armazenado na pilha
+0x0040008c  0x08100023  j 0x0040008c          64   	j Fim
+.DATA
+0x10010000    0x6f747349 0x20686520 0x74206d75 0x65747365 0x20200021 0x20202020 0x20202020 0x20202020 
+0x10010020    0x20202020 0x20202020 0x00000000 0xffe00000 0x00000000 0x00000000 0x00000000 0x00000000
